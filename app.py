@@ -11,9 +11,11 @@ def cronbach_alpha(df):
     alpha = (k / (k - 1)) * (1 - variances.sum() / total_var)
     return alpha
 
+# הגדרות עיצוב כלליות
 st.set_page_config(page_title="Cronbach Alpha Calculator", layout="wide")
 st.title("חישוב מהימנות: אלפא קרונבאך")
 
+# העלאת קובץ
 uploaded_file = st.file_uploader("העלה קובץ Excel או CSV", type=["csv", "xlsx"])
 
 if uploaded_file:
@@ -26,8 +28,14 @@ if uploaded_file:
         st.write("תצוגה מקדימה של הנתונים:")
         st.dataframe(df)
 
-        alpha = cronbach_alpha(df)
-        st.success(f"אלפא קרונבאך: {alpha:.3f}")
+        # סינון עמודות מספריות בלבד
+        numeric_df = df.select_dtypes(include='number')
+
+        if numeric_df.empty:
+            st.warning("לא נמצאו עמודות מספריות לחישוב.")
+        else:
+            alpha = cronbach_alpha(numeric_df)
+            st.success(f"אלפא קרונבאך: {alpha:.3f}")
 
     except Exception as e:
         st.error(f"שגיאה בקריאת הקובץ: {e}")
