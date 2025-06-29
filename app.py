@@ -11,7 +11,7 @@ def cronbach_alpha(df):
     alpha = (k / (k - 1)) * (1 - variances.sum() / total_var)
     return alpha
 
-# הגדרות עיצוב כלליות
+# הגדרות עמוד
 st.set_page_config(page_title="Cronbach Alpha Calculator", layout="wide")
 st.title("חישוב מהימנות: אלפא קרונבאך")
 
@@ -20,6 +20,7 @@ uploaded_file = st.file_uploader("העלה קובץ Excel או CSV", type=["csv"
 
 if uploaded_file:
     try:
+        # קריאה לפי סוג הקובץ
         if uploaded_file.name.endswith(".csv"):
             df = pd.read_csv(uploaded_file)
         else:
@@ -28,14 +29,22 @@ if uploaded_file:
         st.write("תצוגה מקדימה של הנתונים:")
         st.dataframe(df)
 
-        # סינון עמודות מספריות בלבד
-        numeric_df = df.select_dtypes(include='number')
+        if st.button("חשב מחדש"):
+            # סינון עמודות מספריות בלבד
+            numeric_df = df.select_dtypes(include='number')
 
-        if numeric_df.empty:
-            st.warning("לא נמצאו עמודות מספריות לחישוב.")
-        else:
-            alpha = cronbach_alpha(numeric_df)
-            st.success(f"אלפא קרונבאך: {alpha:.3f}")
+            # הסרת עמודות דמוגרפיות לא רלוונטיות
+            columns_to_exclude = ['גיל', 'וותק', 'היקף משרה']
+            for col in columns_to_exclude:
+                if col in numeric_df.columns:
+                    numeric_df = numeric_df.drop(columns=col)
+
+            # בדיקה אם יש עמודות תקפות
+            if numeric_df.empty:
+                st.warning("לא נמצאו עמודות מספריות מתאימות לחישוב אלפא קרונבאך.")
+            else:
+                alpha = cronbach_alpha(numeric_df)
+                st.success(f"אלפא קרונבאך: {alpha:.3f}")
 
     except Exception as e:
-        st.error(f"שגיאה בקריאת הקובץ: {e}")
+        st.error(f"שגיאה בקריאת הקובץ או בחישוב: {e}")
