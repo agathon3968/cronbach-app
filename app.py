@@ -39,9 +39,12 @@ if uploaded_file:
                 if col in numeric_df.columns:
                     numeric_df = numeric_df.drop(columns=col)
 
-            # בדיקה אם יש עמודות תקפות
+            # הסרת שורות שבהן כל הערכים חסרים
+            numeric_df = numeric_df.dropna(how='all')
+
+            # בדיקה אם יש נתונים לחישוב
             if numeric_df.empty:
-                st.warning("לא נמצאו עמודות מספריות מתאימות לחישוב אלפא קרונבאך.")
+                st.warning("לא נמצאו שורות או עמודות מתאימות לחישוב.")
             else:
                 alpha = cronbach_alpha(numeric_df)
                 st.success(f"אלפא קרונבאך: {alpha:.3f}")
